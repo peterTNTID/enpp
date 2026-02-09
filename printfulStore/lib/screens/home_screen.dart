@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           return MasonryGridView.count(
-            crossAxisCount: 3, // Smaller items
+            crossAxisCount: 4, // Smaller items - updated to 4
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             padding: const EdgeInsets.all(12),
