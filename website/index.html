@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENPP | Even Newer Payments Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #ffffff;
+            --accent-color: #333333;
+            --subtle-text: #888888;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            padding: 2rem;
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* Hero Typography */
+        h1.logo {
+            font-size: 8rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        p.subtitle {
+            font-size: 1.25rem;
+            font-weight: 300;
+            color: var(--subtle-text);
+            margin-top: 0.5rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        p.description {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #ccc;
+            max-width: 600px;
+            margin: 3rem auto 0 auto;
+            /* Added top margin */
+            line-height: 1.6;
+        }
+
+        /* Value Props */
+        .features {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .feature-item {
+            border-left: 1px solid var(--accent-color);
+            padding-left: 1rem;
+            text-align: left;
+        }
+
+        .feature-item h3 {
+            font-size: 1.1rem;
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+        }
+
+        .feature-item p {
+            color: var(--subtle-text);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Footer / Status */
+        .status-bar {
+            margin-top: 5rem;
+            padding: 1.5rem 2rem;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            display: inline-block;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-bar p {
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+            color: var(--subtle-text);
+        }
+
+        .status-bar strong {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .infrastructure {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Background Interest */
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+            h1.logo {
+                font-size: 5rem;
+            }
+
+            .features {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .feature-item {
+                border-left: none;
+                border-top: 1px solid var(--accent-color);
+                padding-left: 0;
+                padding-top: 1rem;
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <h1 class="logo">ENPP</h1>
+        <p class="subtitle">Even Newer Payments Platform</p>
+
+        <div class="features">
+            <div class="feature-item">
+                <h3>Instant Settlement</h3>
+                <p>Liquidity at the speed of data.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Minimal Fees</h3>
+                <p>Always under 1%. No hidden costs.</p>
+            </div>
+        </div>
+
+        <p class="description">
+            Facilitating instant payments from $0.20 to $9,999 for creators, merchants, and modern emergent economies.
+        </p>
+
+        <div class="status-bar">
+            <p><strong>Status:</strong> Stealth Mode</p>
+            <p>Invite-only public rollout Q3 2026</p>
+            <div class="infrastructure">
+                Built on Wise & Stripe infrastructure
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -75,19 +75,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         orElse: () => _product!.variants.first,
       );
     }
+    
+    // Determine images to show
+    final List<String> galleryImages = [];
+    
+    // 1. Current variant image
+    if (currentVariant?.imageUrl != null) {
+      galleryImages.add(currentVariant!.imageUrl!);
+    }
+    
+    // 2. Extra views (dedup)
+    for (var view in _product!.viewImages) {
+      if (!galleryImages.contains(view.url)) {
+        galleryImages.add(view.url);
+      }
+    }
+    
+    // 3. Fallback to thumbnail if empty
+    if (galleryImages.isEmpty && _product!.thumbnailGraphUrl.isNotEmpty) {
+       galleryImages.add(_product!.thumbnailGraphUrl);
+    }
 
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            // ... (keep existing AppBar config if needed, but simplified here for the replacement context)
             expandedHeight: 400,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               background: CachedNetworkImage(
-                imageUrl: _product!.thumbnailGraphUrl,
+                imageUrl: galleryImages.isNotEmpty ? galleryImages.first : _product!.thumbnailGraphUrl,
                 fit: BoxFit.cover,
                  placeholder: (context, url) => Container(color: Colors.grey[200]),
+                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),
              leading: CircleAvatar(
@@ -127,6 +147,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  
+                  const SizedBox(height: 8),
+
                   Text(
                     _product!.description.isNotEmpty ? _product!.description : 'No description available.',
                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -196,8 +219,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ],
 
 
-                  // Add to Cart Button
-                  SizedBox(
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+          
+          if (galleryImages.isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 1.0,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[200]!),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: CachedNetworkImage(
+                          imageUrl: galleryImages[index],
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(color: Colors.grey[100]),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
+                        ),
+                      ),
+                    );
+                  },
+                  childCount: galleryImages.length,
+                ),
+              ),
+            ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
@@ -224,11 +288,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
-                ],
-              ),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
         ],
       ),
     );

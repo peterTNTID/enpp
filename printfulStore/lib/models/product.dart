@@ -5,6 +5,7 @@ class Product {
   final String description;
   final String thumbnailGraphUrl;
   final List<ProductImage> images;
+  final List<ProductViewImage> viewImages;
   final List<Variant> variants;
 
   Product({
@@ -13,6 +14,7 @@ class Product {
     required this.description,
     required this.thumbnailGraphUrl,
     this.images = const [],
+    this.viewImages = const [],
     this.variants = const [],
   });
 
@@ -22,9 +24,16 @@ class Product {
       name: json['name'] ?? 'Unknown Product',
       description: json['description'] ?? '', // API might require extra call for description
       thumbnailGraphUrl: json['thumbnail_url'] ?? '',
-      // Files/Images usually come from a separate endpoint or detailed view in Printful
+      images: [], // Will be populated in details fetch
     );
   }
+}
+
+class ProductViewImage {
+  final String url;
+  final String title; // 'Front', 'Back', etc.
+  
+  ProductViewImage({required this.url, required this.title});
 }
 
 class Variant {
@@ -36,6 +45,7 @@ class Variant {
   final String price;
   final String currency;
   final bool inStock;
+  final String? imageUrl;
 
   Variant({
     required this.id,
@@ -46,9 +56,23 @@ class Variant {
     required this.price,
     required this.currency,
     required this.inStock,
+    this.imageUrl,
   });
 
   factory Variant.fromJson(Map<String, dynamic> json) {
+    String? imgUrl;
+    if (json['files'] != null) {
+      final List<dynamic> files = json['files'];
+      if (files.isNotEmpty) {
+        // Look for 'preview', otherwise take first
+        final preview = files.firstWhere(
+          (f) => f['type'] == 'preview', 
+          orElse: () => files.first,
+        );
+        imgUrl = preview['preview_url'];
+      }
+    }
+
     return Variant(
       id: json['id'] ?? 0,
       productId: json['product_id'] ?? 0,
@@ -58,6 +82,7 @@ class Variant {
       price: json['retail_price'] ?? '0.00',
       currency: json['currency'] ?? 'USD',
       inStock: json['in_stock'] ?? true,
+      imageUrl: imgUrl,
     );
   }
 }

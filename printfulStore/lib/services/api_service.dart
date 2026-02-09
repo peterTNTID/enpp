@@ -4,14 +4,27 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/product.dart';
 
 class ApiService {
-  final String _baseUrl = 'https://api.printful.com';
+  // Get API key from dotenv safely
+  String get _apiKey {
+    try {
+      return dotenv.env['PRINTFUL_API_KEY'] ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
   
-  // Get API key from dotenv
-  String get _apiKey => dotenv.env['PRINTFUL_API_KEY'] ?? '';
+  String get _baseUrl {
+      try {
+        // Use proxy URL if defined, else default
+        return dotenv.env['API_BASE_URL'] ?? 'https://api.printful.com';
+      } catch (e) {
+        return 'https://api.printful.com';
+      }
+  }
 
   Future<List<Product>> fetchProducts() async {
     if (_apiKey.isEmpty) {
-      print('Warning: No API Key found. Using mock data.');
+      print('Warning: No API Key found (or dotenv not init). Using mock data.');
       return _getMockProducts();
     }
 
@@ -27,7 +40,23 @@ class ApiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> result = data['result'];
-        return result.map((json) => Product.fromJson(json)).toList();
+        var products = result.map((json) => Product.fromJson(json)).toList();
+        
+        // If using proxy, rewrite image URLs
+        if (_baseUrl.contains('localhost')) {
+           products = products.map((p) {
+             // Create a new Product with modified URL since fields are final
+             return Product(
+               id: p.id,
+               name: p.name,
+               description: p.description,
+               thumbnailGraphUrl: '$_baseUrl/image_proxy?url=${Uri.encodeComponent(p.thumbnailGraphUrl)}',
+               images: p.images, // Note: images list might also need rewriting if populated
+               variants: p.variants,
+             );
+           }).toList();
+        }
+        return products;
       } else {
         throw Exception('Failed to load products: ${response.statusCode}');
       }
@@ -56,18 +85,79 @@ class ApiService {
           final Map<String, dynamic> data = json.decode(response.body);
           final Map<String, dynamic> result = data['result'];
           
-          // Map sync product data
           final productSync = result['sync_product'];
-          final List<dynamic> syncVariants = result['sync_variants'];
-          
+          final syncVariantsRaw = result['sync_variants'];
+          final List<dynamic> syncVariants = (syncVariantsRaw is List) ? syncVariantsRaw : [];
+
+          // Map initial variants
           List<Variant> variants = syncVariants.map((v) => Variant.fromJson(v)).toList();
+
+          String thumbnailUrl = productSync['thumbnail_url'];
+          
+          // FORCE REWRITE for debugging / local development
+          final proxyBase = 'http://localhost:8080'; 
+          
+          // Helper to rewrite URL
+          String rewriteUrl(String url) {
+             if (!url.contains('localhost')) {
+               return '$proxyBase/image_proxy?url=${Uri.encodeComponent(url)}';
+             }
+             return url;
+          }
+
+          if (thumbnailUrl.isNotEmpty) {
+             thumbnailUrl = rewriteUrl(thumbnailUrl);
+          }
+          
+          // Rewrite variant images
+          variants = variants.map((v) {
+             if (v.imageUrl != null) {
+               return Variant(
+                 id: v.id,
+                 productId: v.productId,
+                 name: v.name,
+                 size: v.size,
+                 color: v.color,
+                 price: v.price,
+                 currency: v.currency,
+                 inStock: v.inStock,
+                 imageUrl: rewriteUrl(v.imageUrl!),
+               );
+             }
+             return v;
+          }).toList();
+          
+          // Collect extra images (views) from variants
+          final Map<String, ProductViewImage> uniqueViews = {};
+           
+          if (syncVariantsRaw is List) {
+            for (var v in syncVariantsRaw) {
+               final List<dynamic>? files = v['files'];
+               if (files != null) {
+                  for (var f in files) {
+                     final type = f['type'];
+                     final url = f['preview_url'];
+                     
+                     if (url != null && !uniqueViews.containsKey(url)) {
+                        uniqueViews[url] = ProductViewImage(
+                          url: rewriteUrl(url), 
+                          title: type ?? 'View'
+                        );
+                     }
+                  }
+               }
+            }
+          }
+          
+          final viewImages = uniqueViews.values.toList();
 
           return Product(
             id: productSync['id'],
             name: productSync['name'],
-            description: '', // Printful sync product endpoint doesn't always return description, might need catalog API
-            thumbnailGraphUrl: productSync['thumbnail_url'],
+            description: '', 
+            thumbnailGraphUrl: thumbnailUrl,
             variants: variants,
+            viewImages: viewImages,
           );
 
         } else {

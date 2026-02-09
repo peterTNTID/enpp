@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SCANDI STORE'),
+        title: const Text('DANGAR ISLAND MERCH'),
         actions: [
           IconButton(
             icon: const Icon(Icons.shopping_bag_outlined),
@@ -52,10 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           return MasonryGridView.count(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            padding: const EdgeInsets.all(16),
+            crossAxisCount: 3, // Smaller items
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            padding: const EdgeInsets.all(12),
             itemCount: store.products.length,
             itemBuilder: (context, index) {
               final product = store.products[index];
