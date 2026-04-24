@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Light Theme (Default) */
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
+    --color-primary: #2563eb;
+    --color-secondary: #0284c7;
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-border: #e2e8f0;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    --glow-shadow: rgba(37, 99, 235, 0.15);
+  }
+
+  .dark {
+    /* Dark Theme */
+    --color-background: #0f172a;
+    --color-surface: #1e293b;
+    --color-primary: #3b82f6;
+    --color-secondary: #0ea5e9;
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #94a3b8;
+    --color-border: #334155;
+    --glass-bg: rgba(30, 41, 59, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glow-shadow: rgba(59, 130, 246, 0.5);
+  }
+
+  :root {
+    --font-sans: "Inter", system-ui, sans-serif;
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    antialiased: true;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+@theme default {
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-border: var(--color-border);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.glow {
+  box-shadow: 0 0 40px -10px var(--glow-shadow);
+}

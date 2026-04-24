@@ -1,10 +1,23 @@
 {
-    "hosting": {
-        "public": "website",
-        "ignore": [
-            "firebase.json",
-            "**/.*",
-            "**/node_modules/**"
-        ]
-    }
+    "hosting": [
+        {
+            "target": "dangarislandmerch",
+            "public": "nextPrintfulStore/out",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+            ],
+            "cleanUrls": true
+        },
+        {
+            "site": "theenpp",
+            "public": "website",
+            "ignore": [
+                "firebase.json",
+                "**/.*",
+                "**/node_modules/**"
+            ]
+        }
+    ]
 }

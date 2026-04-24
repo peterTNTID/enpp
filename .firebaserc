@@ -1,5 +1,23 @@
 {
   "projects": {
-    "default": "theenpp"
-  }
+    "default": "theenpp",
+    "tntidapi": "tntidapi"
+  },
+  "targets": {
+    "tntidapi": {
+      "hosting": {
+        "dangarislandmerch": [
+          "dangarislandmerch"
+        ]
+      }
+    },
+    "theenpp": {
+      "hosting": {
+        "dangarislandmerch": [
+          "dangarislandmerch"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

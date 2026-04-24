@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printful Store Pricing Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        h1 {
+            color: #1f2937;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            width: 300px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .positive {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .negative {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .loading {
+            font-style: italic;
+            color: #6b7280;
+            margin-top: 10px;
+        }
+
+        .error {
+            color: #dc2626;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fee2e2;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .image-cell {
+            width: 60px;
+        }
+
+        .image-cell img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .refreshing-row {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Printful Store Pricing Dashboard</h1>
+
+    <div class="controls">
+        <input type="text" id="apiKey" placeholder="Printful API Key" value="***REMOVED***">
+        <button id="loadBtn">Load Pricing Data</button>
+    </div>
+
+    <div id="statusMessage" class="loading" style="display: none;"></div>
+    <div id="errorMessage" class="error"></div>
+
+    <table id="productsTable" style="display: none;">
+        <thead>
+            <tr>
+                <th class="image-cell">Image</th>
+                <th>Product Name</th>
+                <th>Variant Name</th>
+                <th>Retail Price (AUD)</th>
+                <th>Printful Cost (AUD)</th>
+                <th>Profit Margin (AUD)</th>
+                <th>Margin %</th>
+            </tr>
+        </thead>
+        <tbody id="productsBody">
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+
+    <script>
+        const STORE_URL = 'https://api.printful.com/store/products';
+        const CATALOG_VARIANT_URL = 'https://api.printful.com/products/variant';
+
+        const loadBtn = document.getElementById('loadBtn');
+        const apiKeyInput = document.getElementById('apiKey');
+        const statusMessage = document.getElementById('statusMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const productsTable = document.getElementById('productsTable');
+        const productsBody = document.getElementById('productsBody');
+
+        async function fetchWithAuth(url, apiKey) {
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API Error ${response.status}: ${errorData.error?.message || response.statusText}`);
+            }
+            return response.json();
+        }
+
+        async function loadData() {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                showError("Please enter a Printful API Key");
+                return;
+            }
+
+            try {
+                // Reset state
+                loadBtn.disabled = true;
+                productsTable.style.display = 'none';
+                productsBody.innerHTML = '';
+                errorMessage.style.display = 'none';
+
+                showStatus("Fetching all products...");
+
+                // 1. Fetch all store products
+                const productsData = await fetchWithAuth(STORE_URL, apiKey);
+                const products = productsData.result;
+
+                showStatus(`Found ${products.length} products. Fetching variants and base costs... This may take a moment.`);
+
+                productsTable.style.display = 'table';
+                let loadedCount = 0;
+
+                // Process products sequentially or in small batches to respect rate limits
+                for (const product of products) {
+                    showStatus(`Fetching variants for: ${product.name} (${loadedCount + 1}/${products.length})`);
+
+                    // Fetch product variants details
+                    const productDetails = await fetchWithAuth(`${STORE_URL}/${product.id}`, apiKey);
+                    const syncVariants = productDetails.result.sync_variants;
+
+                    for (const v of syncVariants) {
+                        // Create row immediately showing retail
+                        const tr = document.createElement('tr');
+                        const thumbnail = v.files?.find(f => f.type === 'preview')?.thumbnail_url || product.thumbnail_url;
+
+                        tr.innerHTML = `
+                            <td class="image-cell"><img src="${thumbnail}" alt="thumbnail"/></td>
+                            <td>${product.name}</td>
+                            <td>${v.name}</td>
+                            <td>$${v.retail_price}</td>
+                            <td class="cost-cell">Loading...</td>
+                            <td class="diff-cell">...</td>
+                            <td class="margin-cell">...</td>
+                        `;
+                        productsBody.appendChild(tr);
+
+                        try {
+                            // Fetch catalog variant cost
+                            const catalogData = await fetchWithAuth(`${CATALOG_VARIANT_URL}/${v.variant_id}`, apiKey);
+                            const cost = parseFloat(catalogData.result.variant.price) || 0;
+                            const retail = parseFloat(v.retail_price) || 0;
+                            const diff = retail - cost;
+                            const marginPercent = retail > 0 ? ((diff / retail) * 100).toFixed(1) : "0.0";
+
+                            const diffClass = diff > 0 ? 'positive' : (diff < 0 ? 'negative' : '');
+
+                            tr.querySelector('.cost-cell').textContent = `$${cost.toFixed(2)}`;
+                            tr.querySelector('.diff-cell').innerHTML = `<span class="${diffClass}">$${diff.toFixed(2)}</span>`;
+                            tr.querySelector('.margin-cell').innerHTML = `<span class="${diffClass}">${marginPercent}%</span>`;
+                        } catch (err) {
+                            console.error('Error fetching catalog cost for variant', v.id, err);
+                            tr.querySelector('.cost-cell').textContent = 'Error';
+                            tr.querySelector('.cost-cell').style.color = '#dc2626';
+                        }
+                    }
+                    loadedCount++;
+                }
+
+                showStatus(`Finished loading data for ${products.length} products!`);
+                setTimeout(() => statusMessage.style.display = 'none', 3000);
+
+            } catch (error) {
+                console.error("Load failed", error);
+                showError(error.message);
+            } finally {
+                loadBtn.disabled = false;
+            }
+        }
+
+        function showStatus(msg) {
+            statusMessage.style.display = 'block';
+            statusMessage.textContent = msg;
+        }
+
+        function showError(msg) {
+            statusMessage.style.display = 'none';
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = msg;
+        }
+
+        loadBtn.addEventListener('click', loadData);
+    </script>
+</body>
+
+</html>

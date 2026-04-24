@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENPP | Even Newer Payments Platform</title>
+    <title>Payments the way they should be. | Low cost, instant settlement</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -43,18 +43,78 @@
             font-weight: 800;
             margin: 0;
             letter-spacing: -0.05em;
-            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+
+            /* Add an oversized gradient that we can animate */
+            background: linear-gradient(45deg,
+                    #ffffff,
+                    #ffffff,
+                    #ffffff,
+                    #ffffff,
+                    #ff00ff,
+                    #00ffff,
+                    #ffff00,
+                    #ff0000,
+                    #00ff00,
+                    #0000ff);
+            background-size: 400% 400%;
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1;
+
+            /* Start white for 8s, then slowly loop the colors */
+            animation: lava-lamp 30s ease infinite;
+            animation-delay: 8s;
+        }
+
+        @keyframes lava-lamp {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        p.subtitle-main {
+            font-size: 1.75rem;
+            font-weight: 400;
+            color: var(--text-color);
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.01em;
+
+            /* Start white for 8s, then slowly loop the colors */
+            background: linear-gradient(45deg,
+                    #ffffff,
+                    #ffffff,
+                    #ffffff,
+                    #ffffff,
+                    #ff00ff,
+                    #00ffff,
+                    #ffff00,
+                    #ff0000,
+                    #00ff00,
+                    #0000ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: lava-lamp 45s ease infinite;
+            animation-delay: 8s;
         }
 
         p.subtitle {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 300;
             color: var(--subtle-text);
-            margin-top: 0.5rem;
-            letter-spacing: 0.2em;
+            margin-top: 0;
+            letter-spacing: 0.15em;
             text-transform: uppercase;
             opacity: 0.8;
             margin-bottom: 2rem;
@@ -145,6 +205,14 @@
                 font-size: 5rem;
             }
 
+            p.subtitle-main {
+                font-size: 1.25rem;
+            }
+
+            p.subtitle {
+                font-size: 0.9rem;
+            }
+
             .features {
                 flex-direction: column;
                 align-items: center;
@@ -169,7 +237,8 @@
 
     <div class="container">
         <h1 class="logo">ENPP</h1>
-        <p class="subtitle">Even Newer Payments Platform</p>
+        <p class="subtitle-main">Payments the way they should be.</p>
+        <p class="subtitle">Low cost, instant settlement</p>
 
         <div class="features">
             <div class="feature-item">
@@ -178,19 +247,21 @@
             </div>
             <div class="feature-item">
                 <h3>Minimal Fees</h3>
-                <p>Always under 1%. No hidden costs.</p>
+                <p>1% or less. No hidden costs.</p>
             </div>
         </div>
 
         <p class="description">
-            Facilitating instant payments from $0.20 to $9,999 for creators, merchants, and modern emergent economies.
+            Facilitating instant payments from $0.09 to $9,999 for creators, merchants, and modern emergent economies.
         </p>
 
         <div class="status-bar">
             <p><strong>Status:</strong> Stealth Mode</p>
             <p>Invite-only public rollout Q3 2026</p>
             <div class="infrastructure">
-                Built on Wise & Stripe infrastructure
+                Built on leading global infrastructure.<br>
+                It just works.<br>
+                Everywhere
             </div>
         </div>
         <div class="footer-legal">
