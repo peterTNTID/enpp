@@ -1,5 +1,5 @@
 import fs from 'fs';
-const apiKey = '***REMOVED***';
+const apiKey = process.env.NEXT_PUBLIC_PRINTFUL_API_KEY;
 const baseUrl = 'https://api.printful.com';
 
 async function main() {
